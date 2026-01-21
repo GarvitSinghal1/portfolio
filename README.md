@@ -19,10 +19,6 @@ A futuristic, single-page portfolio website designed to showcase projects, resea
 *   **Font Awesome**: Vector icons.
 *   **Google Fonts**: 'Outfit' and 'Space Grotesk'.
 
-## 📦 How to Run
-
-1.  Simply download or clone the repository.
-2.  Open the `index.html` file in any modern web browser (Chrome, Firefox, Safari, Edge).
 
 ## 📄 Sections
 
