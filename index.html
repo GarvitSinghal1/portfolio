@@ -20,22 +20,77 @@
 
     <style>
         :root {
-            /* Color Palette */
-            --primary: #8b5cf6;
-            --primary-dark: #6d28d9;
+            /* Premium Color Palette */
+            --primary: #7c3aed;
+            /* Deeper violet */
+            --primary-dark: #5b21b6;
             --primary-glow: #a78bfa;
-            --accent: #22d3ee;
+            --accent: #00f3ff;
+            /* Sharper cyan */
+            --accent-glow: #22d3ee;
 
-            --bg-dark: #030014;
-            --bg-card: rgba(17, 24, 39, 0.7);
-            --bg-card-border: rgba(139, 92, 246, 0.2);
+            --bg-dark: #050505;
+            /* OLED Black */
+            --bg-darker: #000000;
+            --bg-card: rgba(20, 20, 20, 0.6);
+            --bg-card-border: rgba(255, 255, 255, 0.08);
 
-            --text-main: #f3f4f6;
-            --text-muted: #9ca3af;
+            --text-main: #ffffff;
+            --text-muted: #888888;
 
-            --gradient-main: linear-gradient(135deg, #6d28d9 0%, #8b5cf6 50%, #22d3ee 100%);
-            --glass: rgba(17, 25, 40, 0.75);
-            --glass-border: rgba(255, 255, 255, 0.125);
+            --gradient-main: linear-gradient(135deg, #7c3aed 0%, #00f3ff 100%);
+            --glass: rgba(10, 10, 10, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.05);
+
+            --cursor-size: 20px;
+        }
+
+        /* Noise Texture */
+        .noise-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9000;
+            opacity: 0.05;
+            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        /* Custom Cursor */
+        body {
+            cursor: none;
+            /* Hide default cursor */
+        }
+
+        .cursor-dot {
+            width: 5px;
+            height: 5px;
+            background-color: white;
+            position: fixed;
+            top: 0;
+            left: 0;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            z-index: 9999;
+            pointer-events: none;
+            will-change: transform;
+        }
+
+        .cursor-outline {
+            width: var(--cursor-size);
+            height: var(--cursor-size);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            position: fixed;
+            top: 0;
+            left: 0;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            z-index: 9998;
+            pointer-events: none;
+            transition: width 0.2s, height 0.2s, background-color 0.2s;
+            will-change: transform;
         }
 
         /* Reset & Base */
@@ -153,18 +208,59 @@
 
         .glass-card {
             background: var(--glass);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
             border-radius: 20px;
             padding: 2rem;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transition: transform 0.1s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            will-change: transform;
+        }
+
+        /* Holographic Glow Effect */
+        .glass-card::before {
+            content: "";
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            top: 0;
+            left: 0;
+            border-radius: inherit;
+            background: radial-gradient(800px circle at var(--mouse-x, 0) var(--mouse-y, 0),
+                    rgba(255, 255, 255, 0.06),
+                    transparent 40%);
+            z-index: 1;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .glass-card::after {
+            content: "";
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            top: 0;
+            left: 0;
+            border-radius: inherit;
+            background: radial-gradient(600px circle at var(--mouse-x, 0) var(--mouse-y, 0),
+                    rgba(124, 58, 237, 0.15),
+                    transparent 40%);
+            z-index: 1;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .glass-card:hover::before,
+        .glass-card:hover::after {
+            opacity: 1;
         }
 
         .glass-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
-            border-color: var(--primary);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 30px -10px rgba(124, 58, 237, 0.3);
         }
 
         /* Animations */
@@ -207,66 +303,67 @@
             transform: translateY(0);
         }
 
-        /* Navbar */
+        /* Navbar - Floating Glass Pill */
         nav {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            padding: 1.5rem 0;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: fit-content;
+            /* Fill content */
+            min-width: 600px;
+            padding: 0.8rem 2rem;
             z-index: 1000;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-            background: rgba(3, 0, 20, 0.5);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            background: rgba(10, 10, 10, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 50px;
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+        }
+
+        nav.hidden {
+            transform: translate(-50%, -150%);
+            opacity: 0;
         }
 
         .nav-content {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            width: 100%;
         }
 
         .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
+            font-size: 1.2rem;
+            font-weight: 800;
             letter-spacing: 1px;
             color: white;
-        }
-
-        .logo span {
-            color: var(--primary);
+            margin-right: 2rem;
         }
 
         .nav-links {
             display: flex;
-            gap: 2rem;
+            gap: 1.5rem;
         }
 
         .nav-links a {
-            font-size: 0.9rem;
-            font-weight: 500;
+            font-size: 0.85rem;
+            font-weight: 600;
             color: var(--text-muted);
-            position: relative;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: color 0.3s;
         }
 
         .nav-links a:hover {
-            color: white;
+            color: var(--accent);
         }
 
         .nav-links a::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            bottom: -5px;
-            left: 0;
-            background-color: var(--primary);
-            transition: width 0.3s;
-        }
-
-        .nav-links a:hover::after {
-            width: 100%;
+            display: none;
+            /* Remove old underline */
         }
 
         /* Hero Section */
@@ -327,9 +424,210 @@
             animation: blink 0.7s infinite;
         }
 
-        @keyframes blink {
+        /* Glitch Effect */
+        .glitch {
+            position: relative;
+            color: white;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            text-shadow: 2px 2px var(--primary), -2px -2px var(--accent);
+        }
+
+        .glitch::before,
+        .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-dark);
+        }
+
+        .glitch::before {
+            left: 2px;
+            text-shadow: -1px 0 var(--accent);
+            clip: rect(24px, 550px, 90px, 0);
+            animation: glitch-anim-2 3s infinite linear alternate-reverse;
+        }
+
+        .glitch::after {
+            left: -2px;
+            text-shadow: -1px 0 var(--primary);
+            clip: rect(85px, 550px, 140px, 0);
+            animation: glitch-anim 2.5s infinite linear alternate-reverse;
+        }
+
+        @keyframes glitch-anim {
+            0% {
+                clip: rect(12px, 9999px, 5px, 0);
+            }
+
+            5% {
+                clip: rect(85px, 9999px, 14px, 0);
+            }
+
+            10% {
+                clip: rect(104px, 9999px, 86px, 0);
+            }
+
+            15% {
+                clip: rect(5px, 9999px, 63px, 0);
+            }
+
+            20% {
+                clip: rect(26px, 9999px, 32px, 0);
+            }
+
+            25% {
+                clip: rect(117px, 9999px, 4px, 0);
+            }
+
+            30% {
+                clip: rect(48px, 9999px, 92px, 0);
+            }
+
+            35% {
+                clip: rect(62px, 9999px, 66px, 0);
+            }
+
+            40% {
+                clip: rect(27px, 9999px, 61px, 0);
+            }
+
+            45% {
+                clip: rect(14px, 9999px, 8px, 0);
+            }
+
             50% {
-                border-color: transparent;
+                clip: rect(31px, 9999px, 107px, 0);
+            }
+
+            55% {
+                clip: rect(138px, 9999px, 60px, 0);
+            }
+
+            60% {
+                clip: rect(58px, 9999px, 107px, 0);
+            }
+
+            65% {
+                clip: rect(82px, 9999px, 3px, 0);
+            }
+
+            70% {
+                clip: rect(36px, 9999px, 126px, 0);
+            }
+
+            75% {
+                clip: rect(28px, 9999px, 137px, 0);
+            }
+
+            80% {
+                clip: rect(115px, 9999px, 10px, 0);
+            }
+
+            85% {
+                clip: rect(16px, 9999px, 114px, 0);
+            }
+
+            90% {
+                clip: rect(35px, 9999px, 148px, 0);
+            }
+
+            95% {
+                clip: rect(143px, 9999px, 61px, 0);
+            }
+
+            100% {
+                clip: rect(131px, 9999px, 20px, 0);
+            }
+        }
+
+        @keyframes glitch-anim-2 {
+            0% {
+                clip: rect(129px, 9999px, 36px, 0);
+            }
+
+            5% {
+                clip: rect(36px, 9999px, 4px, 0);
+            }
+
+            10% {
+                clip: rect(85px, 9999px, 66px, 0);
+            }
+
+            15% {
+                clip: rect(94px, 9999px, 92px, 0);
+            }
+
+            20% {
+                clip: rect(23px, 9999px, 98px, 0);
+            }
+
+            25% {
+                clip: rect(85px, 9999px, 72px, 0);
+            }
+
+            30% {
+                clip: rect(71px, 9999px, 97px, 0);
+            }
+
+            35% {
+                clip: rect(126px, 9999px, 16px, 0);
+            }
+
+            40% {
+                clip: rect(140px, 9999px, 98px, 0);
+            }
+
+            45% {
+                clip: rect(9px, 9999px, 104px, 0);
+            }
+
+            50% {
+                clip: rect(33px, 9999px, 133px, 0);
+            }
+
+            55% {
+                clip: rect(98px, 9999px, 96px, 0);
+            }
+
+            60% {
+                clip: rect(12px, 9999px, 67px, 0);
+            }
+
+            65% {
+                clip: rect(135px, 9999px, 50px, 0);
+            }
+
+            70% {
+                clip: rect(47px, 9999px, 16px, 0);
+            }
+
+            75% {
+                clip: rect(148px, 9999px, 126px, 0);
+            }
+
+            80% {
+                clip: rect(120px, 9999px, 55px, 0);
+            }
+
+            85% {
+                clip: rect(31px, 9999px, 23px, 0);
+            }
+
+            90% {
+                clip: rect(94px, 9999px, 22px, 0);
+            }
+
+            95% {
+                clip: rect(10px, 9999px, 25px, 0);
+            }
+
+            100% {
+                clip: rect(104px, 9999px, 5px, 0);
             }
         }
 
@@ -338,7 +636,12 @@
             bottom: 40px;
             left: 50%;
             transform: translateX(-50%);
-            animation: bounce 2s infinite;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+        }
+
+        .scroll-indicator:hover {
+            opacity: 1;
         }
 
         .mouse {
@@ -630,42 +933,56 @@
             background: linear-gradient(to top, var(--bg-dark), #0a0118);
         }
 
+        /* Circuit Board Timeline */
         .timeline {
             position: relative;
             max-width: 800px;
             margin: 0 auto;
+            padding: 2rem 0;
         }
 
+        /* Central Circuit Line */
         .timeline::after {
             content: '';
             position: absolute;
-            width: 2px;
-            background: rgba(139, 92, 246, 0.3);
+            width: 4px;
+            background: var(--bg-card-border);
             top: 0;
             bottom: 0;
             left: 50%;
-            margin-left: -1px;
+            margin-left: -2px;
+            box-shadow: 0 0 15px rgba(124, 58, 237, 0.2);
+            z-index: 0;
         }
 
         .timeline-item {
-            padding: 10px 40px;
+            padding: 10px 50px;
             position: relative;
             background-color: inherit;
             width: 50%;
         }
 
+        /* Node/Chip Marker */
         .timeline-item::after {
             content: '';
             position: absolute;
-            width: 20px;
-            height: 20px;
-            right: -10px;
+            width: 16px;
+            height: 16px;
+            right: -8px;
             background-color: var(--bg-dark);
-            border: 4px solid var(--primary);
-            top: 15px;
-            border-radius: 50%;
-            z-index: 1;
-            box-shadow: 0 0 10px var(--primary);
+            border: 2px solid var(--accent);
+            top: 20px;
+            z-index: 2;
+            box-shadow: 0 0 10px var(--accent), inset 0 0 5px var(--accent);
+            transform: rotate(45deg);
+            /* Diamond shape chip */
+            transition: all 0.3s ease;
+        }
+
+        .timeline-item:hover::after {
+            background-color: var(--accent);
+            box-shadow: 0 0 20px var(--accent);
+            transform: rotate(225deg);
         }
 
         .left {
@@ -676,50 +993,83 @@
             left: 50%;
         }
 
+        /* Circuit Traces to Items */
         .left::before {
             content: " ";
-            height: 0;
             position: absolute;
-            top: 22px;
-            width: 0;
+            top: 28px;
+            right: 10px;
+            width: 40px;
+            height: 2px;
+            background: linear-gradient(to left, var(--accent), transparent);
             z-index: 1;
-            right: 30px;
-            border: medium solid var(--glass-border);
-            border-width: 10px 0 10px 10px;
-            border-color: transparent transparent transparent rgba(255, 255, 255, 0.1);
         }
 
         .right::before {
             content: " ";
-            height: 0;
             position: absolute;
-            top: 22px;
-            width: 0;
+            top: 28px;
+            left: 10px;
+            width: 40px;
+            height: 2px;
+            background: linear-gradient(to right, var(--accent), transparent);
             z-index: 1;
-            left: 30px;
-            border: medium solid var(--glass-border);
-            border-width: 10px 10px 10px 0;
-            border-color: transparent rgba(255, 255, 255, 0.1) transparent transparent;
         }
 
         .right::after {
-            left: -10px;
+            left: -8px;
         }
 
         .timeline-content {
-            padding: 20px 30px;
-            background: rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            background: rgba(10, 10, 10, 0.8);
             position: relative;
-            border-radius: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(5px);
-            transition: all 0.3s ease;
+            border-radius: 10px;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+            transition: all 0.4s ease;
+        }
+
+        /* Tech Corners for Timeline Cards */
+        .timeline-content::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: -1px;
+            width: 20px;
+            height: 20px;
+            border-top: 2px solid var(--primary);
+            border-left: 2px solid var(--primary);
+            border-radius: 4px 0 0 0;
+            opacity: 0.5;
+        }
+
+        .timeline-content::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            right: -1px;
+            width: 20px;
+            height: 20px;
+            border-bottom: 2px solid var(--primary);
+            border-right: 2px solid var(--primary);
+            border-radius: 0 0 4px 0;
+            opacity: 0.5;
         }
 
         .timeline-content:hover {
-            transform: scale(1.03);
+            transform: translateY(-5px);
             border-color: var(--primary);
-            box-shadow: 0 0 20px rgba(139, 92, 246, 0.2);
+            box-shadow: 0 10px 30px -10px rgba(124, 58, 237, 0.2);
+        }
+
+        .timeline-content:hover::before,
+        .timeline-content:hover::after {
+            opacity: 1;
+            width: 100%;
+            height: 100%;
+            transition: all 0.5s ease;
+            border-color: var(--accent);
         }
 
         /* Contact Section */
@@ -956,6 +1306,10 @@
 </head>
 
 <body>
+    <!-- Noise & Cursor -->
+    <div class="noise-overlay"></div>
+    <div class="cursor-dot" data-cursor-dot></div>
+    <div class="cursor-outline" data-cursor-outline></div>
 
     <!-- Navigation -->
     <nav>
@@ -976,13 +1330,14 @@
     <section id="hero">
         <canvas id="particles-canvas"></canvas>
         <div class="container hero-content">
-            <p class="hero-greeting reveal">Hello, I'm</p>
-            <h1 class="hero-name reveal">Garvit Singhal</h1>
+            <p class="hero-greeting reveal">System Online //</p>
+            <h1 class="hero-name glitch reveal" data-text="GARVIT SINGHAL">GARVIT SINGHAL</h1>
             <div class="hero-roles reveal">
+                <span class="role-static">ENGINEERING </span>
                 <span class="typing-text"></span>
             </div>
             <div class="reveal">
-                <a href="#projects" class="btn btn-primary">View My Work</a>
+                <a href="#projects" class="btn btn-primary">Initialize Sequence</a>
             </div>
         </div>
 
@@ -1209,15 +1564,7 @@
                         <span class="photo-text">Reveal Full Image</span>
                     </div>
                 </div>
-                <!-- Photo 4 -->
-                <div class="photo-item reveal"
-                    onclick="openLightbox('https://drive.google.com/thumbnail?id=1fpbbFf4-DAV-KvA8E6epAxUMuFopTJ9-&sz=w1000')">
-                    <img src="https://drive.google.com/thumbnail?id=1fpbbFf4-DAV-KvA8E6epAxUMuFopTJ9-&sz=w1000"
-                        alt="Photography by Garvit Singhal" loading="lazy">
-                    <div class="photo-overlay">
-                        <span class="photo-text">Reveal Full Image</span>
-                    </div>
-                </div>
+
             </div>
 
             <p style="text-align: center; margin-top: 2rem; color: var(--text-muted);">
@@ -1335,7 +1682,7 @@
 
     <!-- JavaScript -->
     <script>
-        // --- 1. Particle System ---
+        // --- 1. Physics-Based Neural Network Particles ---
         const canvas = document.getElementById('particles-canvas');
         const ctx = canvas.getContext('2d');
 
@@ -1343,26 +1690,61 @@
         canvas.height = window.innerHeight;
 
         let particles = [];
-        const particleCount = 100;
+        const particleCount = 120; // Increased density
+
+        // Mouse interaction
+        let mouse = { x: null, y: null, radius: 150 };
+
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.x;
+            mouse.y = e.y;
+        });
+
+        window.addEventListener('mouseleave', () => {
+            mouse.x = null;
+            mouse.y = null;
+        });
 
         class Particle {
             constructor() {
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
                 this.size = Math.random() * 2 + 1;
-                this.speedX = Math.random() * 1 - 0.5;
-                this.speedY = Math.random() * 1 - 0.5;
-                this.color = `rgba(${Math.random() > 0.5 ? '139, 92, 246' : '34, 211, 238'}, ${Math.random() * 0.5 + 0.2})`;
+                this.baseX = this.x;
+                this.baseY = this.y;
+                this.density = (Math.random() * 30) + 1;
+                this.color = `rgba(${Math.random() > 0.5 ? '124, 58, 237' : '0, 243, 255'}, ${Math.random() * 0.5 + 0.3})`;
+                this.vx = (Math.random() - 0.5) * 0.5; // Natural drift velocity
+                this.vy = (Math.random() - 0.5) * 0.5;
             }
 
             update() {
-                this.x += this.speedX;
-                this.y += this.speedY;
+                // Physics: Mouse Interaction (Push/Pull)
+                let dx = mouse.x - this.x;
+                let dy = mouse.y - this.y;
+                let distance = Math.sqrt(dx * dx + dy * dy);
+                let forceDirectionX = dx / distance;
+                let forceDirectionY = dy / distance;
+                let maxDistance = mouse.radius;
+                let force = (maxDistance - distance) / maxDistance;
+                let directionX = forceDirectionX * force * this.density;
+                let directionY = forceDirectionY * force * this.density;
 
-                if (this.x > canvas.width) this.x = 0;
-                if (this.x < 0) this.x = canvas.width;
-                if (this.y > canvas.height) this.y = 0;
-                if (this.y < 0) this.y = canvas.height;
+                if (distance < mouse.radius && mouse.x !== null) {
+                    // Push away from mouse
+                    this.x -= directionX;
+                    this.y -= directionY;
+                } else {
+                    // Return to natural drift
+                    this.x += this.vx;
+                    this.y += this.vy;
+
+                    // Boundary wrap
+                    if (this.x > canvas.width) this.x = 0;
+                    if (this.x < 0) this.x = canvas.width;
+                    if (this.y > canvas.height) this.y = 0;
+                    if (this.y < 0) this.y = canvas.height;
+                }
             }
 
             draw() {
@@ -1386,16 +1768,16 @@
                 particles[i].update();
                 particles[i].draw();
 
-                // Connecting lines
+                // Advanced Neural Connections
                 for (let j = i; j < particles.length; j++) {
                     const dx = particles[i].x - particles[j].x;
                     const dy = particles[i].y - particles[j].y;
                     const distance = Math.sqrt(dx * dx + dy * dy);
 
-                    if (distance < 100) {
+                    if (distance < 120) {
                         ctx.beginPath();
-                        ctx.strokeStyle = `rgba(139, 92, 246, ${0.1 - distance / 1000})`;
-                        ctx.lineWidth = 1;
+                        ctx.strokeStyle = `rgba(124, 58, 237, ${0.15 - distance / 1200})`; // Subtle violet connections
+                        ctx.lineWidth = 0.8;
                         ctx.moveTo(particles[i].x, particles[i].y);
                         ctx.lineTo(particles[j].x, particles[j].y);
                         ctx.stroke();
@@ -1416,7 +1798,7 @@
 
         // --- 2. Typing Effect ---
         const typingText = document.querySelector('.typing-text');
-        const roles = ['Robotics Enthusiast', 'AI Researcher', 'Web Developer', 'Innovator'];
+        const roles = ['ADVANCED ROBOTICS', 'NEURAL NETWORKS', 'DIGITAL EXPERIENCES', 'FUTURE TECH'];
         let roleIndex = 0;
         let charIndex = 0;
         let isDeleting = false;
@@ -1462,7 +1844,7 @@
 
         revealElements.forEach(el => revealObserver.observe(el));
 
-        // --- 4. 3D Tilt Effect for Cards ---
+        // --- 4. Holographic Card Effect & 3D Tilt ---
         const cards = document.querySelectorAll('.glass-card');
 
         cards.forEach(card => {
@@ -1471,18 +1853,47 @@
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
 
+                // Set CSS variables for holographic effect
+                card.style.setProperty('--mouse-x', `${x}px`);
+                card.style.setProperty('--mouse-y', `${y}px`);
+
+                // 3D Tilt Logic
                 const centerX = rect.width / 2;
                 const centerY = rect.height / 2;
 
-                const rotateX = ((y - centerY) / centerY) * -5; // Max rotation deg
-                const rotateY = ((x - centerX) / centerX) * 5;
+                // Reduced tilt intensity for more "premium" feel
+                const rotateX = ((y - centerY) / centerY) * -2;
+                const rotateY = ((x - centerX) / centerX) * 2;
 
-                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.01, 1.01, 1.01)`;
             });
 
             card.addEventListener('mouseleave', () => {
                 card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
             });
+        });
+
+        // --- 5. Floating Navigation Logic ---
+        let lastScroll = 0;
+        const nav = document.querySelector('nav');
+
+        window.addEventListener('scroll', () => {
+            const currentScroll = window.pageYOffset;
+
+            if (currentScroll <= 0) {
+                nav.classList.remove('hidden');
+                return;
+            }
+
+            if (currentScroll > lastScroll && currentScroll > 100) {
+                // Scroll Down
+                nav.classList.add('hidden');
+            } else {
+                // Scroll Up
+                nav.classList.remove('hidden');
+            }
+
+            lastScroll = currentScroll;
         });
 
         // --- 5. Lightbox Logic ---
@@ -1510,6 +1921,42 @@
             }, 300);
             document.body.style.overflow = 'auto'; // Restore scrolling
         }
+
+        // --- 6. Custom Cursor Logic ---
+        const cursorDot = document.querySelector('[data-cursor-dot]');
+        const cursorOutline = document.querySelector('[data-cursor-outline]');
+
+        window.addEventListener('mousemove', (e) => {
+            const posX = e.clientX;
+            const posY = e.clientY;
+
+            // Dot follows instantly
+            cursorDot.style.left = `${posX}px`;
+            cursorDot.style.top = `${posY}px`;
+
+            // Outline follows with lag (using animation for smoothness)
+            cursorOutline.animate({
+                left: `${posX}px`,
+                top: `${posY}px`
+            }, { duration: 500, fill: "forwards" });
+        });
+
+        // Magnetic Hover Effect
+        const interactiveElements = document.querySelectorAll('a, button, .project-card, .photo-item, .skill-item');
+
+        interactiveElements.forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                cursorOutline.style.width = '50px';
+                cursorOutline.style.height = '50px';
+                cursorOutline.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+            });
+
+            el.addEventListener('mouseleave', () => {
+                cursorOutline.style.width = '20px';
+                cursorOutline.style.height = '20px';
+                cursorOutline.style.backgroundColor = 'transparent';
+            });
+        });
 
     </script>
 </body>
